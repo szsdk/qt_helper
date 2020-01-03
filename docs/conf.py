@@ -29,6 +29,7 @@ author = 'szsdk'
 # ones.
 extensions = [
         "sphinx.ext.autodoc",
+        "sphinx.ext.intersphinx",
         "pallets_sphinx_themes",
 ]
 
