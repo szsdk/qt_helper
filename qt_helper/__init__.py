@@ -1,7 +1,10 @@
 """
-There are three rules for parsing the input argument `k=v` to initialize the widget.
-1. If `k` has suffix `_s`, for example, `clicked_s`, then run 
-    `w.k_without_suffix.connect(lambda *arg, **karg: v(w, *arg, **karg))
+There are three rules for parsing the input argument ``k=v`` to initialize the widget.
+
+1. If ``k`` has suffix ``_s``, for example, ``clicked_s``, then run 
+
+.. qt_helper::
+    w.k_without_suffix.connect(lambda *arg, **karg: v(w, *arg, **karg))
 2. If `set{k}` is an method of widget `w`, then run `w.set{k}(v)`
 3. If `k` is an attribute of widget `w`, then run `w.k(v)`.
 4. Ohterwise, raise an error
@@ -39,10 +42,11 @@ def _initWidget(w, **kargs):
             raise Exception(f"Cannot parse {k}")
     return w
 
-def widgetHelper(_widgetType):
-    def wrap(**kargs):
-        w = _widgetType(kargs.pop('parent', None))
+def widgetHelper(widgetType):
+    def wrap(parent=None, **kargs)->widgetType:
+        w = widgetType(parent)
         return _initWidget(w, **kargs)
+    wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
 for w in ["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
@@ -61,6 +65,7 @@ def gridLayoutFromList(wl, parent=None):
     return w
 
 def widgetFromList(l, parent=None):
+    "test help doc"
     w = QtWidgets.QWidget(parent=parent)
     w.setLayout(gridLayoutFromList(l, w))
     return w
