@@ -11,7 +11,7 @@ Pythonic widget initialization
 
 Let's look at the hello-world example first.
 
-.. code-block:: 
+.. code-block:: python
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -37,7 +37,7 @@ First rule of argument parsing:
 In the second example, whenever the combo box is changed, a message box is poped 
 up to show the changed result.
 
-.. code-block:: 
+.. code-block:: python
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -84,7 +84,7 @@ filling a grid layout from a widget list. The difference between those two
 is that the first one returns a widget and the second one returns a pure
 ``QtWidgets.QGridLayout``. The following code explains itself.
 
-.. code-block::
+.. code-block:: python
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -104,7 +104,7 @@ A class called ``widgetList`` is implemented for this job. You can get a name
 to certain elements in this list and access them again like a dictionary.
 Let's look at the example first.
 
-.. code-block::
+.. code-block:: python
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -150,7 +150,7 @@ The values of widgets in a ``widgetList`` can be fetched with method ``namedValu
 or ``toValue`` as shown in this final example which includes almost all features
 of ``qt_helper``. 
 
-.. code-block:: 
+.. code-block:: python
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
