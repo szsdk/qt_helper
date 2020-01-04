@@ -34,7 +34,7 @@ def widgetHelper(widgetType):
     def wrap(parent=None, **kargs)->widgetType:
         w = widgetType(parent)
         return _initWidget(w, **kargs)
-    wrap.__doc__ = f" "
+    wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
 for w in ["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
