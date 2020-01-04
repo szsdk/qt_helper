@@ -23,13 +23,9 @@ updateObjectName=True)
 w = qh.widgetFromList(wl)
 wl['b'].clicked.connect(
     lambda c: qh.messageBox(
-        text=str(wl.toValue(named=True)), 
+        text=str(wl.namedValue()['c']), 
         standardButtons_e="Ok | Cancel"
     ).exec_()
 )
 w.show()
 app.exec_()
-
-        # `_e` suffix convert a string to a enum value
-        # In this case, "Ok | Cancel" would be converted to `QMessageBox.Ok | QMessageBox.Cancel`
-        # first and sent to `setStandardButtons`
