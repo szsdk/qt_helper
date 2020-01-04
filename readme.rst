@@ -12,8 +12,6 @@ Pythonic widget initialization
 Let's look at the hello-world example first.
 
 .. code-block:: 
-    :emphasize-lines: 4
-    :linenos:
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -30,6 +28,7 @@ passing arguments to its initialization function. In this case, we want a
 In ``Qt``, we can set the text to "hello, world" by using ``setText("hello, world")``.
 Now, this setting step is simplified by passing ``text="hello, world"``.
 First rule of argument parsing:
+
     if there is a method of some class in the name of ``setXxxXxx``, it could
     be called by passing argument ``xxxXxx`` (omit "set", change the first
     letter to lowercase) in to the initialization function.
@@ -39,7 +38,6 @@ In the second example, whenever the combo box is changed, a message box is poped
 up to show the changed result.
 
 .. code-block:: 
-    :linenos:
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -54,21 +52,25 @@ up to show the changed result.
 
 Line ``addItems=["on", "off"]``: clearly there is no method called ``setAddItems`` in ``QtWidgets.QComboBox``.
 But this still works because the second parsing rule is:
+
     you can directly passing the name of method you want to call into the 
     initialization function followed by the value to be passed.
 
-Line 6: suffix ``_s`` indicates for signal. Third parsing rule:
+Suffix ``_s`` in ``currentTextChanged_s`` indicates for signal. Third parsing rule:
+
     a signal is connected by passing its name with a suffix ``_s``.
+
 An important thing is that the first argument of the passed function would be
 the widget itself. In this example, the signature of signal ``currentTextChanged``
 is just ``str``. But the passed lambda function take two arguments, and the
 ``comboBox`` widget ``w`` is sent in the first argument.
 
-Line 7: There a new initialization function ``messageBox`` is used. A new
-argument suffix ``_e`` is used which stands for ``enum`` in c++. Because
+Here, a new initialization function ``messageBox`` is used. The
+argument suffix ``_e`` in ``standardButtons_e`` stands for ``enum`` in c++. Because
 the input for method ``setStandardButtons`` is a combination of different
 ``QtWidgets.QMessageBox.StandardButton`` enum elements, which is quite long to input.
 The forth rule is:
+
     string value of argument with suffix ``_e`` is converted the corresponding 
     class enum element. ``|`` can be used for connect different element just
     like original ``Qt`` does.
@@ -83,8 +85,6 @@ is that the first one returns a widget and the second one returns a pure
 ``QtWidgets.QGridLayout``. The following code explains itself.
 
 .. code-block::
-    :emphasize-lines: 4
-    :linenos:
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -105,8 +105,6 @@ to certain elements in this list and access them again like a dictionary.
 Let's look at the example first.
 
 .. code-block::
-    :emphasize-lines: 4,6,7,9,10
-    :linenos: 
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -122,19 +120,16 @@ Let's look at the example first.
     w.show()
     app.exec_()
 
-Line 4: The input of ``widgetList`` is widget list while the element of this
+The input of ``widgetList`` is widget list while the element of this
 list could also be a tuple or a dictionary. This class inherits from builtin 
 list class, so can be passed into ``widgetFromList`` and
 ``gridLayoutFromList`` directly. 
 
-Line 6: If it is a tuple, then the first element would the name (or key) for
-the widget in the second element.
-
-Line 7: A dictionary is also acceptable, the key for name is ``'name'`` and the
-key for widget is ``'w'``.
-
-Line 9, 10: Named widgets can be access by using their names as the keys or
-you can use it as a normal list.
+If the element is a tuple, then the first element would the name (or key) for
+the widget in the second element. A dictionary is also acceptable, the key 
+for name is ``'name'`` and the key for widget is ``'w'``. Those named widgets
+can be access by using their names as the keys or you can use it as a normal
+list.
 
 One important job for widgets is helping user to input some values into the 
 program. However, the definition of value varies from widget to widget.
@@ -156,8 +151,6 @@ or ``toValue`` as shown in this final example which includes almost all features
 of ``qt_helper``. 
 
 .. code-block:: 
-    :emphasize-lines: 18,26
-    :linenos: 
 
     from PyQt5 import QtWidgets
     import qt_helper as qh
@@ -191,21 +184,23 @@ of ``qt_helper``.
     w.show()
     app.exec_()
 
-Line 26: Let's look at this line first. The values of widgets in a ``widgetList``
-can be fetched with two methods
+Let's look at the sentence ``wl['b'].clicked.connect`` at the end of this example
+first. The values of widgets in a ``widgetList`` can be fetched with two methods
 
 1. ``namedValue``: returns a dictionary whose key or value are the 
    names or values of named widgets
 2. ``toValue``: returns the value list whose elements are values of all widgets
    in the ``widgetList`` and structure are as same as the ``widgetList``'s.
+
 In both cases, if there is no definition of value for a widget, ``None`` is returned.
 
-Line 18: How to modify the ``toValue`` behavior of a widget? Actually, the real
+How to modify the ``toValue`` behavior of a widget? Actually, the real
 question should be what the ``toValue`` is. The answer is
 
 1. Checking whether the widget has a ``toValue`` method. If it does,
    call its ``toValue()``.
 2. If the answer is no, try to find a predefined tovalue method based on the
    type of widget.
-This line is simply a shortcut for modifying the ``toValue`` method of the widget
-to the function given in the value of key ``toValue``.
+
+``toValue`` method of the widget can be modified by adding a ``toValue`` item to 
+the dictionary as a shortcut.
