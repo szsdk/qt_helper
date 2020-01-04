@@ -52,7 +52,7 @@ up to show the changed result.
     w.show()
     app.exec_()
 
-Line 5: clearly there is method called ``setAddItems`` in ``QtWidgets.QComboBox``.
+Line ``addItems=["on", "off"]``: clearly there is no method called ``setAddItems`` in ``QtWidgets.QComboBox``.
 But this still works because the second parsing rule is:
     you can directly passing the name of method you want to call into the 
     initialization function followed by the value to be passed.
