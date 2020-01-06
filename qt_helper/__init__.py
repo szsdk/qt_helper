@@ -1,5 +1,7 @@
+import sys
 from PyQt5 import QtWidgets
 
+_QH = sys.modules[__name__]
 _upperFirst = lambda p: p[0].upper() + p[1:]
 
 def _convertEnumVals(wt, vals):
@@ -40,7 +42,7 @@ def widgetHelper(widgetType):
 for w in ["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
 "comboBox", "commandLinkButton", "dateEdit", "dateTimeEdit",
 "timeEdit", "dial", "fontComboBox", "label", "messageBox"]:
-    exec(f"{w} = widgetHelper(QtWidgets.Q{_upperFirst(w)})")
+    setattr(_QH, w, widgetHelper(QtWidgets.Q{_upperFirst(w)}))
 
 def gridLayoutFromList(wl, parent=None):
     w = QtWidgets.QGridLayout(parent)
