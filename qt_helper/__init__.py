@@ -1,16 +1,12 @@
 import sys
 from PyQt5 import QtWidgets
+from typing import List
 
 _QH = sys.modules[__name__]
 _upperFirst = lambda p: p[0].upper() + p[1:]
 
 def _convertEnumVals(wt, vals):
-    def str2enum(s):
-        if hasattr(wt, s):
-            return eval(f"wt.{s}")
-        else:
-            raise Exception(f"Can not find {s} in {wt}")
-    viter = map(lambda s: str2enum(s.strip()), vals.split("|"))
+    viter = map(lambda s: getattr(wt, s.strip()), vals.split("|"))
     ans = next(viter)
     for v in viter:
         ans |= v
@@ -19,15 +15,15 @@ def _convertEnumVals(wt, vals):
 def _initWidget(w, **kargs):
     for k, v in kargs.items():
         if k[-2:] == "_s":
-            eval(f"w.{k[:-2]}").connect(lambda *arg, **kargs: v(w, *arg, **kargs))
+            getattr(w, k[:-2]).connect(lambda *arg, **kargs: v(w, *arg, **kargs))
         elif k[-2:] == "_e" and hasattr(w, f"set{_upperFirst(k[:-2])}"):
             if isinstance(v, str):
                 v = _convertEnumVals(type(w), v)
-            eval(f"w.set{_upperFirst(k[:-2])}")(v)
+            getattr(w, f"set{_upperFirst(k[:-2])}")(v)
         elif hasattr(w, f"set{_upperFirst(k)}"):
-            eval(f"w.set{_upperFirst(k)}")(v)
+            getattr(w, f"set{_upperFirst(k)}")(v)
         elif hasattr(w, k):
-            eval(f"w.{k}")(v)
+            getattr(w, k)(v)
         else:
             raise Exception(f"Cannot parse {k}")
     return w
@@ -39,12 +35,20 @@ def widgetHelper(widgetType):
     wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
-for w in ["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
-"comboBox", "commandLinkButton", "dateEdit", "dateTimeEdit",
-"timeEdit", "dial", "fontComboBox", "label", "messageBox"]:
-    setattr(_QH, w, widgetHelper(QtWidgets.Q{_upperFirst(w)}))
+def addInitializer(ws: List[str])->None:
+    """
+    This function add widget initializers by a name list.
+    """
+    for w in ws:
+        setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
-def gridLayoutFromList(wl, parent=None):
+addInitializer(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
+"comboBox", "dial", "label", "messageBox"])
+
+def gridLayoutFromList(wl, parent=None)->QtWidgets.QGridLayout:
+    """
+    Generate a ``QGridLayout`` by a widget list ``wl``.
+    """
     w = QtWidgets.QGridLayout(parent)
     for row, rws in enumerate(wl, w.rowCount()):
         for col, w0 in enumerate(rws):
@@ -54,19 +58,29 @@ def gridLayoutFromList(wl, parent=None):
                 w.addWidget(w0, row, col)
     return w
 
-def widgetFromList(l, parent=None):
-    "test help doc"
+def widgetFromList(l, parent=None)->QtWidgets.QWidget:
+    """
+    Return a ``QWidget`` whose layout is generated from ``gridLayoutFromList``
+    with ``l``.
+    """
     w = QtWidgets.QWidget(parent=parent)
     w.setLayout(gridLayoutFromList(l, w))
     return w
 
+widgetToValue = {
+        QtWidgets.QLineEdit: 'text', QtWidgets.QComboBox:  'currentText',
+        QtWidgets.QSlider:  'value', QtWidgets.QCheckBox:  'checkState',
+        QtWidgets.QSpinBox:  lambda w: int(w.text()),
+        }
+
 def _toValue(w):
     if hasattr(w, "toValue"): return w.toValue()
-    if isinstance(w, QtWidgets.QLineEdit): return w.text()
-    elif isinstance(w, QtWidgets.QSlider): return w.value()
-    elif isinstance(w, QtWidgets.QComboBox): return w.currentText()
-    elif isinstance(w, QtWidgets.QSpinBox): return int(w.text())
-    elif isinstance(w, QtWidgets.QCheckBox): return w.checkState()
+    for wt, v in widgetToValue.items():
+        if isinstance(w, wt):
+            if isinstance(v, str):
+                return getattr(w, v)()
+            else:
+                return v(w)
     return None
 
 def _listFunctor(f, l):
