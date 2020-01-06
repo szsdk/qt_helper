@@ -132,8 +132,8 @@ can be access by using their names as the keys or you can use it as a normal
 list.
 
 One important job for widgets is helping user to input some values into the 
-program. However, the definition of value varies from widget to widget.
-In ``QLineEdit``, usually it is ``text()`` while in ``QSlider`` it is ``value()``.
+program visually. However, the definition of value varies from widget to widget.
+In ``QLineEdit``, usually it is ``text()`` while in ``QSlider``, it is ``value()``.
 In ``QLabel``, it is nothing, we do not use it for inputing. In this library,
 we predefined the value for some standard widgets which is listed in the following.
 
@@ -200,7 +200,11 @@ question should be what the ``toValue`` is. The answer is
 1. Checking whether the widget has a ``toValue`` method. If it does,
    call its ``toValue()``.
 2. If the answer is no, try to find a predefined tovalue method based on the
-   type of widget.
+   type of widget. This correspondence is stored in a package global dictionary
+   ``widgetToValue`` whose keys are some widget types and values are either
+   the name of a callable method in string or a callable object where you can
+   pass a widget object. It also means you can modify the default tovalue behavior
+   globally by editting this dictionary.
 
 ``toValue`` method of the widget can be modified by adding a ``toValue`` item to 
 the dictionary as a shortcut.
