@@ -29,20 +29,24 @@ def _initWidget(w, **kargs):
     return w
 
 def widgetHelper(widgetType):
+    """
+    Get the helper for a given widget type.
+    """
     def wrap(parent=None, **kargs)->widgetType:
         w = widgetType(parent)
         return _initWidget(w, **kargs)
     wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
-def addInitializer(ws: List[str])->None:
+def addHelpers(ws: List[str])->None:
     """
-    This function add widget initializers by a name list.
+    This function add widget initialization helpers to this package by a name
+    list.
     """
     for w in ws:
         setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
-addInitializer(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
+addHelpers(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
 "comboBox", "dial", "label", "messageBox"])
 
 def gridLayoutFromList(wl, parent=None)->QtWidgets.QGridLayout:
