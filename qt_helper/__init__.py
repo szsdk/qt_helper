@@ -15,7 +15,8 @@ def _convertEnumVals(wt, vals):
 def _initWidget(w, **kargs):
     for k, v in kargs.items():
         if k[-2:] == "_s":
-            getattr(w, k[:-2]).connect(lambda *arg, **kargs: v(w, *arg, **kargs))
+            getattr(w, k[:-2]).connect(
+                    lambda *arg, v=v, **kargs: v(w, *arg, **kargs))
         elif k[-2:] == "_e" and hasattr(w, f"set{_upperFirst(k[:-2])}"):
             if isinstance(v, str):
                 v = _convertEnumVals(type(w), v)
@@ -60,15 +61,6 @@ def gridLayoutFromList(wl, **kargs)->QtWidgets.QGridLayout:
                 w.addLayout(w0, row, col)
             else:
                 w.addWidget(w0, row, col)
-    return w
-
-def widgetFromList(l, **kargs)->QtWidgets.QWidget:
-    """
-    Return a ``QWidget`` whose layout is generated from ``gridLayoutFromList``
-    with ``l``.
-    """
-    w = widget(**kargs)
-    gridLayoutFromList(l, parent=w)
     return w
 
 widgetToValue = {

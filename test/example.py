@@ -20,7 +20,7 @@ wl = qh.widgetList([
     ]
 ],
 updateObjectName=True)
-w = qh.widgetFromList(wl)
+w = qh.widget(layout=qh.gridLayoutFromList(wl))
 wl['b'].clicked.connect(
     lambda c: qh.messageBox(
         text=str(wl.namedValue()['c']), 
