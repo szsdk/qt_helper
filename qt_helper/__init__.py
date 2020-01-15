@@ -162,20 +162,15 @@ def _menuAddItem(dic, parent):
         return w
 
 def menuFromDic(dic, parent=None):
-    """TODO: Docstring for buildMene.
-
-    :arg1: TODO
-    :returns: TODO
-
+    """
+    Generate and initialize `QMenu` by a dictionary
     """
     return _menuAddItem(dic, parent)
 
-def menuBarFromList(li, parent=None):
-    """TODO: Docstring for buildMene.
-
-    :arg1: TODO
-    :returns: TODO
-
+def menuBarFromList(li, parent=None) -> QtWidgets.QMenuBar:
+    """
+    Generate and initialize `QMenu` by a list. The elements of this list
+    are the dictionaries to be used for initializing the menu.
     """
     mb = QtWidgets.QMenuBar(parent=parent)
     for i in li:

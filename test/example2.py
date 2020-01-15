@@ -9,6 +9,7 @@ mb = qh.menuBarFromList([
         'children':[
             {
                 'text': '&Open', 'objectName': 'open',
+                # Attention: A extra argument `w` for the called widget itself is passed
                 'triggered_s': lambda w, c: qh.messageBox(
                     text=f"{w}, {c}", standardButtons_e="Ok"
                     ).exec_()
@@ -20,6 +21,7 @@ mb = qh.menuBarFromList([
     {'title': '&Edit'}
     ])
 
-w = qh.widgetFromList([[mb]])
+w = qh.widgetFromList([[mb], [qh.label(text="Example for menu bar")]])
 print(mb.findChild(object, 'open'))
+w.show()
 app.exec_()
