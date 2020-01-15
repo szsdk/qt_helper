@@ -69,7 +69,7 @@ widgetToValue = {
         QtWidgets.QSpinBox:  lambda w: int(w.text()),
         }
 
-def _toValue(w):
+def toValue(w):
     if hasattr(w, "toValue"): return w.toValue()
     for wt, v in widgetToValue.items():
         if isinstance(w, wt):
@@ -120,10 +120,10 @@ class widgetList(list):
             return super().__getitem__(idx)
 
     def toValue(self, named=True):
-        return _listFunctor(_toValue, self)
+        return _listFunctor(toValue, self)
 
     def namedValue(self):
-        return {k: _toValue(v) for k, v in self._named.items()}
+        return {k: toValue(v) for k, v in self._named.items()}
 
 def _menuAddItem(dic, parent):
     # Get type of dic: menu or action
