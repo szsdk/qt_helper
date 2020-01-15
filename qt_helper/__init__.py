@@ -47,13 +47,13 @@ def addHelpers(ws: List[str])->None:
         setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
 addHelpers(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
-"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action"])
+"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action", "widget", "gridLayout"])
 
-def gridLayoutFromList(wl, parent=None)->QtWidgets.QGridLayout:
+def gridLayoutFromList(wl, **kargs)->QtWidgets.QGridLayout:
     """
     Generate a ``QGridLayout`` by a widget list ``wl``.
     """
-    w = QtWidgets.QGridLayout(parent)
+    w = gridLayout(**kargs)
     for row, rws in enumerate(wl, w.rowCount()):
         for col, w0 in enumerate(rws):
             if isinstance(w0, QtWidgets.QLayout):
@@ -62,13 +62,13 @@ def gridLayoutFromList(wl, parent=None)->QtWidgets.QGridLayout:
                 w.addWidget(w0, row, col)
     return w
 
-def widgetFromList(l, parent=None)->QtWidgets.QWidget:
+def widgetFromList(l, **kargs)->QtWidgets.QWidget:
     """
     Return a ``QWidget`` whose layout is generated from ``gridLayoutFromList``
     with ``l``.
     """
-    w = QtWidgets.QWidget(parent=parent)
-    w.setLayout(gridLayoutFromList(l, w))
+    w = widget(**kargs)
+    gridLayoutFromList(l, parent=w)
     return w
 
 widgetToValue = {
@@ -167,12 +167,12 @@ def menuFromDic(dic, parent=None):
     """
     return _menuAddItem(dic, parent)
 
-def menuBarFromList(li, parent=None) -> QtWidgets.QMenuBar:
+def menuBarFromList(li, **kargs) -> QtWidgets.QMenuBar:
     """
     Generate and initialize `QMenu` by a list. The elements of this list
     are the dictionaries to be used for initializing the menu.
     """
-    mb = QtWidgets.QMenuBar(parent=parent)
+    mb = menuBar(**kargs)
     for i in li:
         m = _menuAddItem(i, mb)
         mb.addMenu(m)
