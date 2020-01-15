@@ -47,7 +47,7 @@ def addHelpers(ws: List[str])->None:
         setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
 addHelpers(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
-"comboBox", "dial", "label", "messageBox"])
+"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action"])
 
 def gridLayoutFromList(wl, parent=None)->QtWidgets.QGridLayout:
     """
@@ -132,3 +132,53 @@ class widgetList(list):
 
     def namedValue(self):
         return {k: _toValue(v) for k, v in self._named.items()}
+
+def _menuAddItem(dic, parent):
+    # Get type of dic: menu or action
+    if dic == "----":
+        return action(parent=parent, separator=True)
+    if 'type' in dic:
+        tp = dic.pop('type')
+    elif 'children' in dic or 'title' in dic:
+        tp = 'menu'
+    elif 'triggered_s' in dic or 'text' in dic:
+        tp = 'action'
+    else:
+        raise Exception(f"Can not identify the type from {dic}")
+
+    if tp == 'action':
+        return action(parent=parent, **dic)
+    elif tp == "menu":
+        children = dic.pop("children", [])
+        w = menu(parent=parent, **dic)
+        for child in children:
+            cw = _menuAddItem(child, w)
+            if isinstance(cw, QtWidgets.QMenu):
+                w.addMenu(cw)
+            elif isinstance(cw, QtWidgets.QAction):
+                w.addAction(cw)
+            else:
+                raise Exception(f"Wrong type: {cw} - {type(cw)}")
+        return w
+
+def menuFromDic(dic, parent=None):
+    """TODO: Docstring for buildMene.
+
+    :arg1: TODO
+    :returns: TODO
+
+    """
+    return _menuAddItem(dic, parent)
+
+def menuBarFromList(li, parent=None):
+    """TODO: Docstring for buildMene.
+
+    :arg1: TODO
+    :returns: TODO
+
+    """
+    mb = QtWidgets.QMenuBar(parent=parent)
+    for i in li:
+        m = _menuAddItem(i, mb)
+        mb.addMenu(m)
+    return mb
