@@ -10,22 +10,22 @@ _upperFirst = lambda p: p[0].upper() + p[1:]
 def _convertEnumVals(wt, vals):
     return reduce(operator.ior, map(lambda s: getattr(wt, s.strip()), vals.split("|")))
 
-def _initWidget(w, **kargs):
-    for k, v in kargs.items():
-        if k[-2:] == "_s":
-            getattr(w, k[:-2]).connect(
-                    lambda *arg, v=v, **kargs: v(w, *arg, **kargs))
-        elif k[-2:] == "_e" and hasattr(w, f"set{_upperFirst(k[:-2])}"):
-            if isinstance(v, str):
-                v = _convertEnumVals(type(w), v)
-            getattr(w, f"set{_upperFirst(k[:-2])}")(v)
-        elif hasattr(w, f"set{_upperFirst(k)}"):
-            getattr(w, f"set{_upperFirst(k)}")(v)
-        elif hasattr(w, k):
-            getattr(w, k)(v)
-        else:
-            raise Exception(f"Cannot parse {k}")
-    return w
+def _initWidget(w, k, v):
+    if k[:2] == "m_":
+        for vi in v: _initWidget(w, k[2:], vi)
+    elif k[-2:] == "_s":
+        getattr(w, k[:-2]).connect(
+                lambda *arg, v=v, **kargs: v(w, *arg, **kargs))
+    elif k[-2:] == "_e" and hasattr(w, f"set{_upperFirst(k[:-2])}"):
+        if isinstance(v, str):
+            v = _convertEnumVals(type(w), v)
+        getattr(w, f"set{_upperFirst(k[:-2])}")(v)
+    elif hasattr(w, f"set{_upperFirst(k)}"):
+        getattr(w, f"set{_upperFirst(k)}")(v)
+    elif hasattr(w, k):
+        getattr(w, k)(v)
+    else:
+        raise Exception(f"Cannot parse {k}")
 
 def widgetHelper(widgetType):
     """
@@ -33,7 +33,10 @@ def widgetHelper(widgetType):
     """
     def wrap(parent=None, **kargs)->widgetType:
         w = widgetType(parent)
-        return _initWidget(w, **kargs)
+        for k, v in kargs.items():
+            _initWidget(w, k, v)
+        return w
+        # return _initWidget(w, **kargs)
     wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
@@ -46,7 +49,7 @@ def addHelpers(ws: List[str])->None:
         setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
 addHelpers(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
-"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action", "widget", "gridLayout"])
+"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action", "widget", "widgetAction", "gridLayout"])
 
 def gridLayoutFromList(wl, **kargs)->QtWidgets.QGridLayout:
     """
@@ -74,7 +77,7 @@ def toValue(w):
             return getattr(w, v)()
     return None
 
-def _menuAddItem(dic, parent):
+def menuFromDic(dic, parent=None):
     # Get type of dic: menu or action
     if dic == "----":
         return action(parent=parent, separator=True)
@@ -94,7 +97,7 @@ def _menuAddItem(dic, parent):
         children = dic.pop("children", [])
         w = menu(**dic)
         for child in children:
-            cw = _menuAddItem(child, w)
+            cw = menuFromDic(child, w)
             if isinstance(cw, QtWidgets.QMenu):
                 w.addMenu(cw)
             elif isinstance(cw, QtWidgets.QAction):
@@ -102,20 +105,3 @@ def _menuAddItem(dic, parent):
             else:
                 raise Exception(f"Wrong type: {cw} - {type(cw)}")
         return w
-
-def menuFromDic(dic, parent=None):
-    """
-    Generate and initialize `QMenu` by a dictionary
-    """
-    return _menuAddItem(dic, parent)
-
-def menuBarFromList(li, **kargs) -> QtWidgets.QMenuBar:
-    """
-    Generate and initialize `QMenu` by a list. The elements of this list
-    are the dictionaries to be used for initializing the menu.
-    """
-    mb = menuBar(**kargs)
-    for i in li:
-        m = _menuAddItem(i, mb)
-        mb.addMenu(m)
-    return mb
