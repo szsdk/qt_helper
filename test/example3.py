@@ -8,8 +8,19 @@ button = qh.pushButton(
         clicked_s=lambda w, checked: print(23)
         )
 wl = [
-    [ qh.label(text="switch"), cmb ],
-    [ qh.lineEdit(text="click the button", enabled=False), button ]
+    [ qh.label(
+        text="switch",
+        styleSheet="QLabel{background-color : #AAAAAA;"\
+                "color : blue; font-size: 24px;}"
+        ),
+        cmb ],
+    [ qh.lineEdit(text="click the button", enabled=False), button ],
+    [ None, qh.label(
+        text="switch",
+        styleSheet="QLabel{background-color : #AAAAAA;"\
+                "color : blue; font-size: 24px;}"
+        ),
+        ],
 ]
 w = qh.widget(layout=qh.gridLayoutFromList(wl))
 button.clicked.connect(

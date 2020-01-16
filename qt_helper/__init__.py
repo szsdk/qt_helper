@@ -1,16 +1,14 @@
 import sys
 from PyQt5 import QtWidgets
 from typing import List
+from functools import reduce
+import operator
 
 _QH = sys.modules[__name__]
 _upperFirst = lambda p: p[0].upper() + p[1:]
 
 def _convertEnumVals(wt, vals):
-    viter = map(lambda s: getattr(wt, s.strip()), vals.split("|"))
-    ans = next(viter)
-    for v in viter:
-        ans |= v
-    return ans
+    return reduce(operator.ior, map(lambda s: getattr(wt, s.strip()), vals.split("|")))
 
 def _initWidget(w, **kargs):
     for k, v in kargs.items():
@@ -64,66 +62,17 @@ def gridLayoutFromList(wl, **kargs)->QtWidgets.QGridLayout:
     return w
 
 widgetToValue = {
-        QtWidgets.QLineEdit: 'text', QtWidgets.QComboBox:  'currentText',
-        QtWidgets.QSlider:  'value', QtWidgets.QCheckBox:  'checkState',
-        QtWidgets.QSpinBox:  lambda w: int(w.text()),
-        }
+    QtWidgets.QLineEdit: 'text', QtWidgets.QComboBox:  'currentText',
+    QtWidgets.QSlider:  'value', QtWidgets.QCheckBox:  'checkState',
+    QtWidgets.QSpinBox: 'value',
+    }
 
 def toValue(w):
     if hasattr(w, "toValue"): return w.toValue()
     for wt, v in widgetToValue.items():
         if isinstance(w, wt):
-            if isinstance(v, str):
-                return getattr(w, v)()
-            else:
-                return v(w)
+            return getattr(w, v)()
     return None
-
-def _listFunctor(f, l):
-    if isinstance(l, list):
-        r = []
-        for w in l:
-            r.append(_listFunctor(f, w))
-        return r
-    else:
-        return f(l)
-
-class widgetList(list):
-    """
-    This class is a subclass of ``list``, where user can access named widgets
-    quickly by ``__getitem__`` and get some default values from named / unnamed
-    widgets.
-    """
-    def __init__(self, l, updateObjectName=True):
-        self._named = {}
-        self._updateObjectName = updateObjectName
-        super().__init__(_listFunctor(self._initialize, l))
-
-    def _initialize(self, l):
-        if isinstance(l, QtWidgets.QWidget):
-            return l
-        if isinstance(l, tuple):
-            name, w = l
-        elif  isinstance(l, dict):
-            name, w = l['name'], l['w']
-            if 'toValue' in l:
-                w.toValue = l['toValue']
-        else:
-            raise Exception(f"can not recognize {l}")
-        self._named[name] = w
-        return w
-
-    def __getitem__(self, idx):
-        if isinstance(idx, str):
-            return self._named[idx]
-        else:
-            return super().__getitem__(idx)
-
-    def toValue(self, named=True):
-        return _listFunctor(toValue, self)
-
-    def namedValue(self):
-        return {k: toValue(v) for k, v in self._named.items()}
 
 def _menuAddItem(dic, parent):
     # Get type of dic: menu or action
@@ -138,11 +87,12 @@ def _menuAddItem(dic, parent):
     else:
         raise Exception(f"Can not identify the type from {dic}")
 
+    dic['parent'] = dic.pop('parent', parent)
     if tp == 'action':
-        return action(parent=parent, **dic)
+        return action(**dic)
     elif tp == "menu":
         children = dic.pop("children", [])
-        w = menu(parent=parent, **dic)
+        w = menu(**dic)
         for child in children:
             cw = _menuAddItem(child, w)
             if isinstance(cw, QtWidgets.QMenu):
