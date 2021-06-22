@@ -27,16 +27,17 @@ def _initWidget(w, k, v):
     else:
         raise Exception(f"Cannot parse {k}")
 
+def initWidget(w, **kargs):
+    for k, v in kargs.items():
+        _initWidget(w, k, v)
+    return w
+
 def widgetHelper(widgetType):
     """
     Get the helper for a given widget type.
     """
     def wrap(parent=None, **kargs)->widgetType:
-        w = widgetType(parent)
-        for k, v in kargs.items():
-            _initWidget(w, k, v)
-        return w
-        # return _initWidget(w, **kargs)
+        return initWidget(widgetType(parent), **kargs)
     wrap.__doc__ = f"Quick initialization function for {widgetType}"
     return wrap
 
@@ -49,7 +50,9 @@ def addHelpers(ws: List[str])->None:
         setattr(_QH, w, widgetHelper(getattr(QtWidgets, f"Q{_upperFirst(w)}")))
 
 addHelpers(["lineEdit", "pushButton", "slider", "checkBox", "spinBox",
-"comboBox", "dial", "label", "messageBox", "menu", "menuBar", "action", "widget", "widgetAction", "gridLayout"])
+"comboBox", "dial", "label",
+"messageBox", "menu", "menuBar", "action", "widget", "widgetAction",
+"gridLayout", "fileDialog"])
 
 def gridLayoutFromList(wl, **kargs)->QtWidgets.QGridLayout:
     """
@@ -79,6 +82,8 @@ def toValue(w):
 
 def menuFromDic(dic, parent=None):
     # Get type of dic: menu or action
+    if 'w' in dic:
+        return dic['w']
     if dic == "----":
         return action(parent=parent, separator=True)
     if 'type' in dic:
@@ -105,3 +110,13 @@ def menuFromDic(dic, parent=None):
             else:
                 raise Exception(f"Wrong type: {cw} - {type(cw)}")
         return w
+
+def getPaths(*argv, mode="open", directory=None, **kargv):
+    w = fileDialog(*argv, **kargv)
+    if mode == "open":
+        if w.exec() == QtWidgets.QFileDialog.Accepted:
+            return w.selectedFiles()
+    elif mode == "save":
+        p = w.getSaveFileName(directory=directory)
+        return [p[0]]
+    return []
